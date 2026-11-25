@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { query } from './config/db.js';
 import authRoutes from './routes/auth.routes.js';
 import solicitudesRoutes from './routes/solicitudes.routes.js';
@@ -11,6 +13,8 @@ import adminRoutes from './routes/admin.routes.js';
 import reportesRoutes from './routes/reportes.routes.js';
 
 const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendPath = path.resolve(__dirname, '../../frontend');
 app.use(cors());
 app.use(express.json());
 
@@ -21,6 +25,10 @@ app.use('/api/notificaciones', notificacionesRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reportes', reportesRoutes);
+
+// Frontend estático servido por el mismo servidor
+app.use(express.static(frontendPath));
+app.get('/', (_req, res) => res.sendFile(path.join(frontendPath, 'index.html')));
 
 // Verifica la conexión con Neon
 app.get('/api/health', async (_req, res) => {
